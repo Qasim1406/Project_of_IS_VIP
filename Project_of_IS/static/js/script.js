@@ -1,3 +1,13 @@
+// ============= GLOBAL VARIABLES & SETUP =============
+
+document.addEventListener('DOMContentLoaded', () => {
+    setupDragAndDrop('encryptDropArea', 'imageFile', 'encryptFilePreview', 'encryptFileName');
+    setupDragAndDrop('decryptDropArea', 'encryptedFile', 'decryptFilePreview', 'decryptFileName');
+    
+    // Initialize AOS-like scroll animations
+    setupScrollAnimations();
+});
+
 // ============= ENCRYPTION FORM HANDLER =============
 
 document.getElementById('encryptForm').addEventListener('submit', async (e) => {
@@ -7,32 +17,28 @@ document.getElementById('encryptForm').addEventListener('submit', async (e) => {
     const imageFile = document.getElementById('imageFile').files[0];
     const encryptBtn = document.getElementById('encryptBtn');
     const encryptLoader = document.getElementById('encryptLoader');
-    const encryptError = document.getElementById('encryptError');
-    const encryptedPreviewCard = document.getElementById('encryptedPreviewCard');
+    const btnText = encryptBtn.querySelector('.btn-text');
+    const previewCard = document.getElementById('encryptedPreviewCard');
 
     // Validation
     if (!password || password.length < 4) {
-        showError('Password must be at least 4 characters', encryptError);
+        showToast('Password must be at least 4 characters', 'error');
         return;
     }
 
     if (!imageFile) {
-        showError('Please select an image', encryptError);
+        showToast('Please select an image to encrypt', 'error');
         return;
     }
 
-    // Show loading state
-    encryptBtn.disabled = true;
-    encryptLoader.classList.remove('d-none');
-    encryptError.classList.add('d-none');
+    // UI Loading State
+    setLoadingState(encryptBtn, true);
 
     try {
-        // Create FormData
         const formData = new FormData();
         formData.append('password', password);
         formData.append('image', imageFile);
 
-        // Send request
         const response = await fetch('/encrypt', {
             method: 'POST',
             body: formData
@@ -40,24 +46,22 @@ document.getElementById('encryptForm').addEventListener('submit', async (e) => {
 
         const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(data.error || 'Encryption failed');
-        }
+        if (!response.ok) throw new Error(data.error || 'Encryption failed');
 
-        // Display success
-        displayEncryptedPreview(data);
+        // Success Handling
+        displayEncryptedResult(data);
+        previewCard.classList.remove('d-none');
+        previewCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        showToast('Image encrypted successfully!', 'success');
         
-        // Reset form
+        // Reset form but keep preview until new action
         document.getElementById('encryptForm').reset();
-        
-        // Show preview card with animation
-        encryptedPreviewCard.classList.remove('d-none');
-        
+        resetFilePreview('encryptFilePreview', 'encryptDropArea');
+
     } catch (error) {
-        showError(error.message || 'Encryption failed', encryptError);
+        showToast(error.message || 'Encryption failed', 'error');
     } finally {
-        encryptBtn.disabled = false;
-        encryptLoader.classList.add('d-none');
+        setLoadingState(encryptBtn, false);
     }
 });
 
@@ -69,38 +73,27 @@ document.getElementById('decryptForm').addEventListener('submit', async (e) => {
     const password = document.getElementById('decryptPassword').value;
     const encryptedFile = document.getElementById('encryptedFile').files[0];
     const decryptBtn = document.getElementById('decryptBtn');
-    const decryptLoader = document.getElementById('decryptLoader');
-    const decryptError = document.getElementById('decryptError');
-    const decryptedImageCard = document.getElementById('decryptedImageCard');
+    const previewCard = document.getElementById('decryptedImageCard');
 
     // Validation
     if (!password) {
-        showError('Please enter password', decryptError, 'decryptErrorText');
+        showToast('Please enter the decryption password', 'error');
         return;
     }
 
     if (!encryptedFile) {
-        showError('Please select encrypted file', decryptError, 'decryptErrorText');
+        showToast('Please upload an encrypted (.enc) file', 'error');
         return;
     }
 
-    if (!encryptedFile.name.endsWith('.enc')) {
-        showError('File must be .enc (encrypted file)', decryptError, 'decryptErrorText');
-        return;
-    }
-
-    // Show loading state
-    decryptBtn.disabled = true;
-    decryptLoader.classList.remove('d-none');
-    decryptError.classList.add('d-none');
+    // UI Loading State
+    setLoadingState(decryptBtn, true);
 
     try {
-        // Create FormData
         const formData = new FormData();
         formData.append('password', password);
         formData.append('encrypted_file', encryptedFile);
 
-        // Send request
         const response = await fetch('/decrypt', {
             method: 'POST',
             body: formData
@@ -108,157 +101,66 @@ document.getElementById('decryptForm').addEventListener('submit', async (e) => {
 
         const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(data.error || 'Decryption failed');
-        }
+        if (!response.ok) throw new Error(data.error || 'Decryption failed');
 
-        // Display decrypted image
-        displayDecryptedImage(data);
-        
-        // Reset form
+        // Success Handling
+        displayDecryptedResult(data);
+        previewCard.classList.remove('d-none');
+        previewCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        showToast('Image decrypted successfully!', 'success');
+
         document.getElementById('decryptForm').reset();
-        
-        // Show preview card with animation
-        decryptedImageCard.classList.remove('d-none');
-        
+        resetFilePreview('decryptFilePreview', 'decryptDropArea');
+
     } catch (error) {
-        showError(error.message || 'Decryption failed', decryptError, 'decryptErrorText');
+        showToast(error.message || 'Decryption failed', 'error');
     } finally {
-        decryptBtn.disabled = false;
-        decryptLoader.classList.add('d-none');
+        setLoadingState(decryptBtn, false);
     }
 });
 
-// ============= HELPER FUNCTIONS =============
-
-function showError(message, errorElement, textElementId = 'errorText') {
-    const textElement = document.getElementById(textElementId);
-    if (textElement) {
-        textElement.textContent = message;
-    }
-    errorElement.classList.remove('d-none');
-    
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-        errorElement.classList.add('d-none');
-    }, 5000);
-}
-
-function displayEncryptedPreview(data) {
-    document.getElementById('encFilename').textContent = data.encrypted_filename;
-    document.getElementById('encFileSize').textContent = data.file_size.toLocaleString();
-    document.getElementById('hexPreview').textContent = data.hex_preview;
-    
-    // Update download button
-    const downloadBtn = document.getElementById('downloadBtn');
-    downloadBtn.onclick = () => {
-        window.location.href = `/download/${data.encrypted_filename}`;
-    };
-}
-
-function displayDecryptedImage(data) {
-    const decryptedImage = document.getElementById('decryptedImage');
-    decryptedImage.src = data.image_data;
-    decryptedImage.onload = () => {
-        // Trigger animation
-        decryptedImage.style.animation = 'none';
-        setTimeout(() => {
-            decryptedImage.style.animation = 'zoomIn 0.6s ease-out';
-        }, 10);
-    };
-}
-
-// ============= FILE INPUT ENHANCEMENTS =============
-
-document.getElementById('imageFile').addEventListener('change', function() {
-    const fileName = this.files[0]?.name || 'No file selected';
-    const uploadBox = this.parentElement;
-    
-    if (this.files[0]) {
-        const fileSize = (this.files[0].size / 1024).toFixed(2);
-        const label = uploadBox.querySelector('small');
-        if (label) {
-            label.textContent = `Selected: ${fileName} (${fileSize} KB)`;
-        }
-    }
-});
-
-document.getElementById('encryptedFile').addEventListener('change', function() {
-    const fileName = this.files[0]?.name || 'No file selected';
-    const uploadBox = this.parentElement;
-    
-    if (this.files[0]) {
-        const fileSize = (this.files[0].size / 1024).toFixed(2);
-        const label = uploadBox.querySelector('small');
-        if (label) {
-            label.textContent = `Selected: ${fileName} (${fileSize} KB)`;
-        }
-    }
-});
-
-// ============= PASSWORD VISIBILITY TOGGLE =============
-
-function togglePasswordVisibility(inputId, iconId) {
-    const input = document.getElementById(inputId);
-    const icon = document.getElementById(iconId);
-    
-    if (input.type === 'password') {
-        input.type = 'text';
-        if (icon) icon.classList.remove('fa-eye-slash');
-        if (icon) icon.classList.add('fa-eye');
-    } else {
-        input.type = 'password';
-        if (icon) icon.classList.remove('fa-eye');
-        if (icon) icon.classList.add('fa-eye-slash');
-    }
-}
-
-// ============= STEGANOGRAPHY FORM HANDLERS =============
+// ============= STEGANOGRAPHY HANDLERS =============
 
 document.getElementById('stegEmbedForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fileInput = document.getElementById('stegImageEmbed');
-    const message = document.getElementById('stegMessage').value || '';
+    const message = document.getElementById('stegMessage').value;
     const resultDiv = document.getElementById('stegEmbedResult');
     const previewImg = document.getElementById('stegPreview');
     const downloadLink = document.getElementById('stegDownload');
+    const btn = e.target.querySelector('button');
 
     if (!fileInput.files[0]) {
-        showNotification('Please select a PNG image to embed into.', 'danger');
+        showToast('Please select a PNG image', 'error');
         return;
     }
 
-    const fd = new FormData();
-    fd.append('image', fileInput.files[0]);
-    fd.append('message', message);
+    const originalBtnText = btn.textContent;
+    btn.textContent = 'Embedding...';
+    btn.disabled = true;
 
     try {
+        const fd = new FormData();
+        fd.append('image', fileInput.files[0]);
+        fd.append('message', message);
+
         const res = await fetch('/steg/embed', { method: 'POST', body: fd });
         const data = await res.json();
+        
         if (!res.ok) throw new Error(data.error || 'Embedding failed');
-        // Show preview
+
         previewImg.src = data.image_data;
         downloadLink.href = `/download/${data.stego_filename}`;
         downloadLink.download = data.stego_filename;
         resultDiv.classList.remove('d-none');
-        showNotification('Message embedded successfully', 'success');
-        document.getElementById('stegEmbedForm').reset();
-
-        // Automatically trigger download of the stego PNG using the base64 data
-        try {
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = data.image_data; // data:image/png;base64,...
-            a.download = data.stego_filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        } catch (err) {
-            // Fallback: user can click the download button
-            console.warn('Auto-download failed, manual download available', err);
-        }
+        showToast('Message embedded successfully!', 'success');
+        
+        e.target.reset();
     } catch (err) {
-        showNotification(err.message || 'Embedding failed', 'danger');
+        showToast(err.message, 'error');
+    } finally {
+        btn.textContent = originalBtnText;
+        btn.disabled = false;
     }
 });
 
@@ -267,256 +169,198 @@ document.getElementById('stegExtractForm')?.addEventListener('submit', async (e)
     const fileInput = document.getElementById('stegImageExtract');
     const resultDiv = document.getElementById('stegExtractResult');
     const outPre = document.getElementById('stegMessageOut');
+    const btn = e.target.querySelector('button');
 
     if (!fileInput.files[0]) {
-        showNotification('Please select a PNG image to extract from.', 'danger');
+        showToast('Please select a Stego PNG image', 'error');
         return;
     }
 
-    const fd = new FormData();
-    fd.append('image', fileInput.files[0]);
+    const originalBtnText = btn.textContent;
+    btn.textContent = 'Extracting...';
+    btn.disabled = true;
 
     try {
+        const fd = new FormData();
+        fd.append('image', fileInput.files[0]);
+
         const res = await fetch('/steg/extract', { method: 'POST', body: fd });
         const data = await res.json();
+        
         if (!res.ok) throw new Error(data.error || 'Extraction failed');
+
         outPre.textContent = data.hidden_message;
         resultDiv.classList.remove('d-none');
-        showNotification('Hidden message extracted successfully', 'success');
-        document.getElementById('stegExtractForm').reset();
+        showToast('Message extracted successfully!', 'success');
+        
+        e.target.reset();
     } catch (err) {
-        showNotification(err.message || 'Extraction failed', 'danger');
+        showToast(err.message, 'error');
+    } finally {
+        btn.textContent = originalBtnText;
+        btn.disabled = false;
     }
 });
 
-// ============= SMOOTH SCROLL NAVIGATION =============
+// ============= HELPER FUNCTIONS =============
 
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        const href = this.getAttribute('href');
-        if (href !== '#' && href !== '#top') {
-            e.preventDefault();
-            const element = document.querySelector(href);
-            if (element) {
-                element.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        }
-    });
-});
-
-// ============= INTERSECTION OBSERVER FOR ANIMATIONS =============
-
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-            observer.unobserve(entry.target);
-        }
-    });
-}, observerOptions);
-
-// Observe all glass cards
-document.querySelectorAll('.glass-card').forEach(card => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px)';
-    card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
-    observer.observe(card);
-});
-
-// ============= HEX PREVIEW SCROLL ANIMATION =============
-
-document.addEventListener('DOMContentLoaded', () => {
-    const hexPreviewContainers = document.querySelectorAll('.hex-preview-container');
+function setLoadingState(btn, isLoading) {
+    const spinner = btn.querySelector('.spinner');
+    const text = btn.querySelector('.btn-text');
     
-    hexPreviewContainers.forEach(container => {
-        const preElement = container.querySelector('.hex-preview');
-        if (preElement) {
-            // Animate hex preview text character by character
-            const text = preElement.textContent;
-            preElement.textContent = '';
-            
-            let index = 0;
-            const typeInterval = setInterval(() => {
-                if (index < text.length) {
-                    preElement.textContent += text[index];
-                    index++;
-                    container.scrollTop = container.scrollHeight;
-                } else {
-                    clearInterval(typeInterval);
-                }
-            }, 5);
+    if (isLoading) {
+        btn.disabled = true;
+        if (spinner) spinner.classList.remove('d-none');
+        if (text) text.style.opacity = '0.5';
+    } else {
+        btn.disabled = false;
+        if (spinner) spinner.classList.add('d-none');
+        if (text) text.style.opacity = '1';
+    }
+}
+
+function displayEncryptedResult(data) {
+    const hexPreview = document.getElementById('hexPreview');
+    hexPreview.textContent = data.hex_preview;
+    
+    const downloadBtn = document.getElementById('downloadBtn');
+    downloadBtn.onclick = () => window.location.href = `/download/${data.encrypted_filename}`;
+    
+    // Animate hex text
+    typeWriterEffect(hexPreview, data.hex_preview);
+}
+
+function displayDecryptedResult(data) {
+    const img = document.getElementById('decryptedImage');
+    const downloadBtn = document.getElementById('downloadDecryptedBtn');
+    
+    img.src = data.image_data;
+    downloadBtn.href = data.image_data;
+}
+
+function typeWriterEffect(element, text) {
+    element.textContent = '';
+    let i = 0;
+    const speed = 2; // ms
+    
+    function type() {
+        if (i < text.length) {
+            element.textContent += text.charAt(i);
+            i++;
+            element.scrollTop = element.scrollHeight;
+            setTimeout(type, speed);
         }
-    });
-});
-
-// ============= KEYBOARD SHORTCUTS =============
-
-document.addEventListener('keydown', (e) => {
-    // Ctrl+1 or Cmd+1 to focus encrypt form
-    if ((e.ctrlKey || e.metaKey) && e.key === '1') {
-        e.preventDefault();
-        document.getElementById('encryptPassword').focus();
     }
-    
-    // Ctrl+2 or Cmd+2 to focus decrypt form
-    if ((e.ctrlKey || e.metaKey) && e.key === '2') {
-        e.preventDefault();
-        document.getElementById('decryptPassword').focus();
-    }
-    
-    // Escape to close preview cards
-    if (e.key === 'Escape') {
-        document.getElementById('encryptedPreviewCard').classList.add('d-none');
-        document.getElementById('decryptedImageCard').classList.add('d-none');
-    }
-});
+    type();
+}
 
-// ============= DRAG AND DROP SUPPORT =============
+// ============= DRAG & DROP SYSTEM =============
 
-function setupDragAndDrop(inputId, dropAreaId) {
+function setupDragAndDrop(areaId, inputId, previewId, nameId) {
+    const area = document.getElementById(areaId);
     const input = document.getElementById(inputId);
-    const dropArea = input?.parentElement || document.getElementById(dropAreaId);
-    
-    if (!dropArea) return;
-    
+    const preview = document.getElementById(previewId);
+    const nameSpan = document.getElementById(nameId);
+
+    if (!area || !input) return;
+
+    // Click to upload
+    area.addEventListener('click', () => input.click());
+
+    // File selection change
+    input.addEventListener('change', () => handleFile(input.files[0]));
+
+    // Drag events
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, preventDefaults, false);
+        area.addEventListener(eventName, preventDefaults, false);
     });
-    
+
     function preventDefaults(e) {
         e.preventDefault();
         e.stopPropagation();
     }
-    
+
     ['dragenter', 'dragover'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => {
-            dropArea.classList.add('drag-over');
-        }, false);
+        area.addEventListener(eventName, () => area.classList.add('drag-over'), false);
     });
-    
+
     ['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => {
-            dropArea.classList.remove('drag-over');
-        }, false);
+        area.addEventListener(eventName, () => area.classList.remove('drag-over'), false);
     });
-    
-    dropArea.addEventListener('drop', (e) => {
+
+    area.addEventListener('drop', (e) => {
         const dt = e.dataTransfer;
-        const files = dt.files;
-        if (input && files.length > 0) {
-            input.files = files;
-            input.dispatchEvent(new Event('change', { bubbles: true }));
+        const file = dt.files[0];
+        input.files = dt.files;
+        handleFile(file);
+    });
+
+    function handleFile(file) {
+        if (file) {
+            nameSpan.textContent = file.name;
+            preview.classList.remove('d-none');
+            area.classList.add('border-primary');
         }
-    }, false);
+    }
 }
 
-// Initialize drag and drop
-setupDragAndDrop('imageFile');
-setupDragAndDrop('encryptedFile');
+function resetFilePreview(previewId, areaId) {
+    document.getElementById(previewId).classList.add('d-none');
+    document.getElementById(areaId).classList.remove('border-primary');
+}
 
-// ============= NOTIFICATION SYSTEM =============
+// ============= TOAST NOTIFICATIONS =============
 
-function showNotification(message, type = 'success') {
-    const notification = document.createElement('div');
-    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
-    notification.style.cssText = `
-        top: 20px;
-        right: 20px;
-        z-index: 2000;
-        max-width: 400px;
-        animation: slideInRight 0.3s ease-out;
-    `;
-    notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-        ${message}
-    `;
+function showToast(message, type = 'success') {
+    // Remove existing toasts
+    document.querySelectorAll('.toast-notification').forEach(t => t.remove());
+
+    const toast = document.createElement('div');
+    toast.className = `toast-notification toast-${type}`;
     
-    document.body.appendChild(notification);
+    const icon = type === 'success' ? 'check-circle' : 'exclamation-circle';
+    const color = type === 'success' ? 'text-success' : 'text-danger';
     
+    toast.innerHTML = `
+        <i class="fas fa-${icon} ${color} fa-lg"></i>
+        <span class="fw-medium">${message}</span>
+    `;
+
+    document.body.appendChild(toast);
+
+    // Auto remove
     setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease-out';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+        toast.style.animation = 'slideIn 0.3s ease-in reverse forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
 }
 
-// ============= PAGE LOAD ANIMATIONS =============
+// ============= COPY HEX FUNCTIONALITY =============
 
-window.addEventListener('load', () => {
-    document.body.style.opacity = '1';
-});
-
-// ============= COPY FUNCTIONALITY FOR HEX PREVIEW =============
-
-document.addEventListener('click', (e) => {
-    if (e.target.closest('.hex-preview')) {
-        const text = document.querySelector('.hex-preview').textContent;
-        if (text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showNotification('Hex preview copied to clipboard!', 'success');
-            });
-        }
+document.getElementById('copyHexBtn')?.addEventListener('click', () => {
+    const hexText = document.getElementById('hexPreview').textContent;
+    if (hexText) {
+        navigator.clipboard.writeText(hexText).then(() => {
+            showToast('Hex code copied to clipboard!', 'success');
+        });
     }
 });
 
-// ============= RESPONSIVE CHECKS =============
+// ============= SCROLL ANIMATIONS =============
 
-const isMobile = () => window.innerWidth < 768;
-const isTablet = () => window.innerWidth < 1024;
-
-window.addEventListener('resize', () => {
-    // Handle responsive behavior changes
-});
-
-// ============= ERROR HANDLING =============
-
-window.addEventListener('error', (event) => {
-    console.error('Global error:', event.error);
-});
-
-window.addEventListener('unhandledrejection', (event) => {
-    console.error('Unhandled promise rejection:', event.reason);
-});
-
-// ============= PERFORMANCE OPTIMIZATION =============
-
-// Debounce function for scroll events
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Lazy load images
-if ('IntersectionObserver' in window) {
-    const imageObserver = new IntersectionObserver((entries) => {
+function setupScrollAnimations() {
+    const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const img = entry.target;
-                if (img.dataset.src) {
-                    img.src = img.dataset.src;
-                    img.removeAttribute('data-src');
-                }
-                imageObserver.unobserve(img);
+                entry.target.style.animationPlayState = 'running';
+                observer.unobserve(entry.target);
             }
         });
-    });
-    
-    document.querySelectorAll('img[data-src]').forEach(img => {
-        imageObserver.observe(img);
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in-up').forEach(el => {
+        el.style.animationPlayState = 'paused';
+        observer.observe(el);
     });
 }
+
