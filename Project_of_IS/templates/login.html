@@ -15,6 +15,61 @@
       align-items: center;
       justify-content: center;
       padding: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background Watermark/Label */
+    .bg-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-10deg);
+      font-size: 15vw;
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.02);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 0;
+      text-transform: uppercase;
+      letter-spacing: 10px;
+    }
+
+    /* Floating Shapes */
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.4;
+      z-index: 0;
+      animation: floatAnimation 20s infinite alternate;
+    }
+
+    .shape-1 {
+      top: -10%;
+      left: -10%;
+      width: 500px;
+      height: 500px;
+      background: var(--primary);
+    }
+
+    .shape-2 {
+      bottom: -10%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: var(--secondary);
+      animation-delay: -5s;
+    }
+
+    @keyframes floatAnimation {
+      0% {
+        transform: translate(0, 0);
+      }
+
+      100% {
+        transform: translate(50px, 50px);
+      }
     }
 
     .brand-logo {
@@ -57,6 +112,12 @@
       border-left: none;
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
+      color: white !important;
+      /* Ensure white text */
+    }
+
+    .glass-input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
     }
 
     .glass-input:focus {
@@ -72,11 +133,22 @@
     .input-group:focus-within .glass-input {
       border-color: var(--primary);
     }
+
+    .glass-card {
+      z-index: 1;
+      backdrop-filter: blur(20px);
+      /* Stronger blur for login card */
+    }
   </style>
 </head>
 
 <body>
   <div class="login-container">
+    <!-- Background Elements -->
+    <div class="bg-label">CipherFrame</div>
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+
     <div class="glass-card fade-in-up" style="max-width: 420px; width: 100%;">
       <div class="text-center mb-4">
         <div class="brand-logo">
@@ -95,7 +167,7 @@
 
       <form method="post" action="/login">
         <div class="mb-4">
-          <label class="form-label">Username</label>
+          <label class="form-label text-white">Username</label>
           <div class="input-group">
             <span class="input-group-text"><i class="fas fa-user"></i></span>
             <input type="text" class="form-control glass-input" name="username" required placeholder="Enter username">
@@ -103,7 +175,7 @@
         </div>
 
         <div class="mb-4">
-          <label class="form-label">Password</label>
+          <label class="form-label text-white">Password</label>
           <div class="input-group">
             <span class="input-group-text"><i class="fas fa-lock"></i></span>
             <input type="password" class="form-control glass-input" name="password" required
