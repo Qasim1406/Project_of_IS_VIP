@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Encryption & Decryption System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark glass-nav">
+        <div class="container-fluid">
+                <a class="navbar-brand fw-bold" href="/">
+                    <span class="brand-mark" aria-hidden="true"></span>
+                    CipherFrame
+                </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/app#encrypt-section">Encrypt</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/app#decrypt-section">Decrypt</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/app#steg-section">Steganography</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/background">Background</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <i class="fas fa-shield-alt"></i> CipherFrame — Secure Image Encryption
+            </h1>
+            <p class="hero-subtitle">Protect your images with military-grade AES-256 encryption. Encrypt, decrypt, and hide messages inside lossless images with confidence.</p>
+
+            <!-- Team banner (compact numbered list) -->
+            <div class="team-banner mt-4 d-none d-md-block">
+                <h3 class="team-title">Team Members</h3>
+                <div class="team-list mt-2">
+                    <div class="team-item compact">
+                        <div class="team-number">1</div>
+                        <div class="team-info">
+                            <div class="team-name">Muhammad Tayyab Mujtaba Khan</div>
+                            <div class="team-id">F24609035</div>
+                        </div>
+                    </div>
+                    <div class="team-item compact">
+                        <div class="team-number">2</div>
+                        <div class="team-info">
+                            <div class="team-name">Owais Ismail</div>
+                            <div class="team-id">F24609055</div>
+                        </div>
+                    </div>
+                    <div class="team-item compact">
+                        <div class="team-number">3</div>
+                        <div class="team-info">
+                            <div class="team-name">Qasim Usman</div>
+                            <div class="team-id">F24609008</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /Team banner -->
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container-fluid main-container">
+        <div class="row g-4">
+            <!-- ENCRYPTION SECTION -->
+            <div class="col-lg-6" id="encrypt-section">
+                <div class="card glass-card fade-in-left">
+                    <div class="card-header glass-header">
+                        <h2 class="card-title mb-0">
+                            <i class="fas fa-lock-open"></i> Encrypt Image
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="encryptForm">
+                            <!-- Password Input -->
+                            <div class="mb-4">
+                                <label for="encryptPassword" class="form-label fw-bold">
+                                    <i class="fas fa-key"></i> Encryption Password
+                                </label>
+                                <input 
+                                    type="password" 
+                                    class="form-control glass-input" 
+                                    id="encryptPassword" 
+                                    placeholder="Enter a strong password (min 4 chars)"
+                                    required
+                                >
+                                <small class="text-muted d-block mt-2">
+                                    <i class="fas fa-info-circle"></i> Use this password to decrypt later
+                                </small>
+                            </div>
+
+                            <!-- File Upload -->
+                            <div class="mb-4">
+                                <label for="imageFile" class="form-label fw-bold">
+                                    <i class="fas fa-image"></i> Select Image
+                                </label>
+                                <div class="upload-box">
+                                    <input 
+                                        type="file" 
+                                        class="form-control glass-input" 
+                                        id="imageFile" 
+                                        accept="image/png,image/jpeg,image/gif,image/bmp"
+                                        required
+                                    >
+                                    <small class="text-muted d-block mt-2">
+                                        Supported: PNG, JPG, GIF, BMP (Max 50MB)
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Encrypt Button -->
+                            <button 
+                                type="submit" 
+                                class="btn btn-encrypt w-100 mb-3"
+                                id="encryptBtn"
+                            >
+                                <i class="fas fa-crypt"></i> Encrypt Image
+                            </button>
+
+                            <!-- Loading Spinner -->
+                            <div id="encryptLoader" class="spinner-container d-none">
+                                <div class="spinner-border spinner-sm" role="status">
+                                    <span class="visually-hidden">Encrypting...</span>
+                                </div>
+                                <span class="ms-2">Encrypting your image...</span>
+                            </div>
+
+                            <!-- Error Message -->
+                            <div id="encryptError" class="alert alert-danger d-none" role="alert">
+                                <i class="fas fa-exclamation-circle"></i> <span id="errorText"></span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Encrypted Preview Card -->
+                <div id="encryptedPreviewCard" class="card glass-card mt-4 d-none fade-in-up">
+                    <div class="card-header glass-header">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-eye"></i> Encrypted Data Preview
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="preview-info mb-3">
+                            <p class="mb-2">
+                                <strong>File Name:</strong> <span id="encFilename"></span>
+                            </p>
+                            <p class="mb-0">
+                                <strong>Size:</strong> <span id="encFileSize"></span> bytes
+                            </p>
+                        </div>
+
+                        <!-- Hex Preview -->
+                        <div class="hex-preview-container">
+                            <pre id="hexPreview" class="hex-preview"></pre>
+                        </div>
+
+                        <!-- Download Button -->
+                        <button 
+                            type="button" 
+                            class="btn btn-download w-100 mt-3"
+                            id="downloadBtn"
+                        >
+                            <i class="fas fa-download"></i> Download Encrypted File
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DECRYPTION SECTION -->
+            <div class="col-lg-6" id="decrypt-section">
+                <div class="card glass-card fade-in-right">
+                    <div class="card-header glass-header">
+                        <h2 class="card-title mb-0">
+                            <i class="fas fa-lock"></i> Decrypt Image
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="decryptForm">
+                            <!-- Password Input -->
+                            <div class="mb-4">
+                                <label for="decryptPassword" class="form-label fw-bold">
+                                    <i class="fas fa-key"></i> Decryption Password
+                                </label>
+                                <input 
+                                    type="password" 
+                                    class="form-control glass-input" 
+                                    id="decryptPassword" 
+                                    placeholder="Enter the encryption password"
+                                    required
+                                >
+                                <small class="text-muted d-block mt-2">
+                                    <i class="fas fa-info-circle"></i> Use the same password you used to encrypt
+                                </small>
+                            </div>
+
+                            <!-- Encrypted File Upload -->
+                            <div class="mb-4">
+                                <label for="encryptedFile" class="form-label fw-bold">
+                                    <i class="fas fa-file-upload"></i> Select Encrypted File
+                                </label>
+                                <div class="upload-box">
+                                    <input 
+                                        type="file" 
+                                        class="form-control glass-input" 
+                                        id="encryptedFile" 
+                                        accept=".enc"
+                                        required
+                                    >
+                                    <small class="text-muted d-block mt-2">
+                                        Upload .enc file
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Decrypt Button -->
+                            <button 
+                                type="submit" 
+                                class="btn btn-decrypt w-100 mb-3"
+                                id="decryptBtn"
+                            >
+                                <i class="fas fa-lock-open"></i> Decrypt Image
+                            </button>
+
+                            <!-- Loading Spinner -->
+                            <div id="decryptLoader" class="spinner-container d-none">
+                                <div class="spinner-border spinner-sm" role="status">
+                                    <span class="visually-hidden">Decrypting...</span>
+                                </div>
+                                <span class="ms-2">Decrypting your image...</span>
+                            </div>
+
+                            <!-- Error Message -->
+                            <div id="decryptError" class="alert alert-danger d-none" role="alert">
+                                <i class="fas fa-exclamation-circle"></i> <span id="decryptErrorText"></span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Decrypted Image Card -->
+                <div id="decryptedImageCard" class="card glass-card mt-4 d-none fade-in-up">
+                    <div class="card-header glass-header">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-image"></i> Decrypted Image
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="decrypted-image-container">
+                            <img id="decryptedImage" src="" alt="Decrypted Image" class="decrypted-image">
+                        </div>
+                        <p class="text-success mt-3 mb-0">
+                            <i class="fas fa-check-circle"></i> Image successfully decrypted!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEGANOGRAPHY SECTION -->
+            <div class="col-12" id="steg-section">
+                <div class="card glass-card mt-4 fade-in-up">
+                    <div class="card-header glass-header">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-user-secret"></i> Image Steganography
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="fw-bold">Embed Message (PNG only)</h5>
+                                <form id="stegEmbedForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Select PNG Image</label>
+                                        <input type="file" id="stegImageEmbed" class="form-control glass-input" accept="image/png" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Message to hide</label>
+                                        <textarea id="stegMessage" class="form-control glass-input" rows="4" placeholder="Type your secret message here"></textarea>
+                                    </div>
+                                    <button class="btn btn-encrypt w-100" type="submit">Embed Message</button>
+                                </form>
+                                <div id="stegEmbedResult" class="mt-3 d-none">
+                                    <p class="mb-2"><strong>Stego Image:</strong></p>
+                                    <img id="stegPreview" src="" class="img-fluid rounded mb-2" />
+                                    <a id="stegDownload" class="btn btn-download w-100" href="#" download>Download Stego PNG</a>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="fw-bold">Extract Message</h5>
+                                <form id="stegExtractForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Select PNG Image</label>
+                                        <input type="file" id="stegImageExtract" class="form-control glass-input" accept="image/png" required>
+                                    </div>
+                                    <button class="btn btn-decrypt w-100" type="submit">Extract Message</button>
+                                </form>
+                                <div id="stegExtractResult" class="mt-3 d-none">
+                                    <p class="mb-1"><strong>Hidden Message:</strong></p>
+                                    <pre id="stegMessageOut" class="hex-preview"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Section -->
+    <div class="about-section" id="about-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card glass-card">
+                        <div class="card-header glass-header">
+                            <h2 class="card-title mb-0">
+                                <i class="fas fa-info-circle"></i> About This System
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="fw-bold mb-3">
+                                        <i class="fas fa-shield-alt text-primary"></i> Security Features
+                                    </h5>
+                                    <ul class="features-list">
+                                        <li><strong>AES-256 Encryption:</strong> Military-grade security</li>
+                                        <li><strong>PBKDF2 Key Derivation:</strong> Secure password hashing</li>
+                                        <li><strong>GCM Mode:</strong> Authenticated encryption</li>
+                                        <li><strong>Random Salt & IV:</strong> Unique for each encryption</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="fw-bold mb-3">
+                                        <i class="fas fa-cogs text-primary"></i> How It Works
+                                    </h5>
+                                    <ul class="features-list">
+                                        <li><strong>Upload:</strong> Select your image</li>
+                                        <li><strong>Encrypt:</strong> Create strong password</li>
+                                        <li><strong>Download:</strong> Get encrypted .enc file</li>
+                                        <li><strong>Decrypt:</strong> Upload & enter password</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container text-center">
+            <p class="mb-0">
+                <i class="fas fa-lock"></i> CipherFrame - Secure Image Encryption System
+            </p>
+            <p class="text-muted small">
+                Your images are encrypted end-to-end. Only you can decrypt with your password.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

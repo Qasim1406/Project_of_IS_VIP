@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CipherFrame — Project Background</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .background-hero {
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.15), rgba(0, 212, 255, 0.1));
+            padding: 80px 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        .background-hero h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        .background-hero .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+        .section-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .team-member {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            background: rgba(108, 99, 255, 0.08);
+            border-left: 3px solid var(--primary-color);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .team-number {
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            font-weight: 800;
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        .feature-item {
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .feature-item i {
+            color: var(--success-color);
+            font-size: 1.3rem;
+        }
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .tech-table th {
+            background: rgba(108, 99, 255, 0.15);
+            padding: 12px;
+            text-align: left;
+            font-weight: 700;
+            color: var(--primary-light);
+            border-bottom: 2px solid rgba(108, 99, 255, 0.3);
+        }
+        .tech-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+        }
+        .tech-table tr:hover {
+            background: rgba(108, 99, 255, 0.05);
+        }
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(108, 99, 255, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--success-color);
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .color-swatch {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 15px;
+            margin-bottom: 10px;
+        }
+        .color-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .checklist i {
+            color: var(--success-color);
+            font-size: 1.1rem;
+        }
+        .demo-step {
+            background: rgba(108, 99, 255, 0.08);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--primary-color);
+        }
+        .demo-step strong {
+            color: var(--primary-light);
+        }
+        .print-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+        @media print {
+            body::before { display: none !important; }
+            .print-button { display: none; }
+            .background-hero { padding: 40px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark glass-nav">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/">
+                <span class="brand-mark" aria-hidden="true"></span>
+                CipherFrame
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/app">App</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="background-hero">
+        <h1><i class="fas fa-file-alt me-2"></i>Project Background</h1>
+        <p class="subtitle">CipherFrame — Secure Image Encryption & Steganography System</p>
+        <p class="text-muted small mt-3">Complete project overview, architecture, features, and implementation details</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container main-container" style="max-width: 1000px;">
+        
+        <!-- Summary Section -->
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-lightbulb"></i>Project Summary</h2>
+            <p><strong>CipherFrame</strong> is a comprehensive web-based Image Encryption & Decryption System with optional image steganography. It provides a modern, secure interface for encrypting sensitive images using military-grade AES-256 encryption (with PBKDF2 key derivation) and includes LSB-based image steganography for hiding secret messages inside PNG images.</p>
+            <div class="feature-grid mt-4">
+                <div class="feature-item">
+                    <i class="fas fa-lock"></i>
+                    <span>AES-256-GCM Encryption</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-key"></i>
+                    <span>PBKDF2 Key Derivation</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-eye"></i>
+                    <span>Hex Preview</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-user-secret"></i>
+                    <span>LSB Steganography</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Simple Login</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-paint-brush"></i>
+                    <span>Modern UI</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Section -->
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-users"></i>Team Members</h2>
+            <div>
+                <div class="team-member">
+                    <div class="team-number">1</div>
+                    <div>
+                        <strong>Muhammad Tayyab Mujtaba Khan</strong><br>
+                        <small class="text-muted">F24609035</small>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <div class="team-number">2</div>
+                    <div>
+                        <strong>Owais Ismail</strong><br>
+                        <small class="text-muted">F24609055</small>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <div class="team-number">3</div>
+                    <div>
+                        <strong>Qasim Usman</strong><br>
+                        <small class="text-muted">F24609008</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technology Stack -->
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-cogs"></i>Technology Stack</h2>
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th>Layer</th>
+                        <th>Technology</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Backend</strong></td>
+                        <td>Python Flask</td>
+                        <td>Web framework, routing, session management</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Encryption</strong></td>
+                        <td>cryptography library</td>
+                        <td>PBKDF2HMAC, AES-256-GCM</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Image Processing</strong></td>
+                        <td>Pillow (PIL)</td>
+                        <td>LSB steganography, PNG read/write</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Frontend</strong></td>
+                        <td>Bootstrap 5, CSS</td>
+                        <td>Responsive UI, glassmorphism styling</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Frontend Logic</strong></td>
+                        <td>Vanilla JavaScript</td>
+                        <td>AJAX requests, auto-download, forms</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Storage</strong></td>
+                        <td>Local filesystem</td>
+                        <td>encrypted_files/ directory</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- UI Design -->
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-palette"></i>UI/UX Design</h2>
+            <h5 class="mt-4 mb-3">Color Palette</h5>
+            <div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #6c63ff;"></div>
+                    <span>Primary: #6c63ff (Purple)</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #ff6b9d;"></div>
+                    <span>Secondary: #ff6b9d (Pink)</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #00d4ff;"></div>
+                    <span>Accent: #00d4ff (Cyan)</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #0f0f23;"></div>
+                    <span>Background: #0f0f23 (Dark Navy)</span>
+                </div>
+            </div>
+            <h5 class="mt-4 mb-3">Typography</h5>
+            <ul class="checklist">
+                <li><i class="fas fa-check"></i> Font Family: <strong>Poppins</strong> (Google Fonts)</li>
+                <li><i class="fas fa-check"></i> Headings: 28–36 pt, font-weight 700–800</li>
+                <li><i class="fas fa-check"></i> Body: 16–20 pt, font-weight 400–600</li>
+            </ul>
+            <h5 class="mt-4 mb-3">Design Patterns</h5>
+            <ul class="checklist">
+                <li><i class="fas fa-check"></i> Glassmorphism: Semi-transparent cards with backdrop blur</li>
+                <li><i class="fas fa-check"></i> Animations: Fade-in, zoom, scale effects on page load</li>
+                <li><i class="fas fa-check"></i> Responsive: Mobile-first, adaptive layouts</li>
+                <li><i class="fas fa-check"></i> Team Display: Numbered list format with gradient badges</li>
+            </ul>
+        </div>
+
+        <!-- Security Architecture -->
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-shield-alt"></i>Security Architecture</h2>
+            <h5 class="mt-4 mb-3">Encryption Flow</h5>
+            <div class="code-block">
+User Password
+    ↓
+PBKDF2HMAC (SHA-256, 100k iterations, random 16-byte salt)
+    ↓
+32-byte AES-256 Key
+    ↓
+AES-256-GCM Encryption (random 12-byte IV, 16-byte auth tag)
+    ↓
+File Format: [salt(16)] [iv(12)] [tag(16)] [ciphertext(...)]
+            </div>
+            <h5 class="mt-4 mb-3">Key Security Points</h5>
+            <ul class="checklist">
+                <li><i class="fas fa-check"></i> <strong>Salt:</strong> Random per encryption; stored in .enc file</li>
+                <li><i class="fas fa-check"></i> <strong>IV:</strong> Random per encryption; prevents pattern recognition</li>
+                <li><i class="fas fa-check"></i> <strong>Auth Tag:</strong> Detects tampering; GCM ensures authenticated encryption</li>
+                <li><i class="fas fa-check"></i> <strong>Key Derivation:</strong> PBKDF2 with 100k iterations slows brute-force</li>
+            </ul>
+        </div>
+
+        <!-- Features Checklist -->
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-check-square"></i>Feature Checklist</h2>
+            <ul class="checklist">
+                <li><i class="fas fa-check"></i> AES-256-GCM encryption with PBKDF2 key derivation</li>
+                <li><i class="fas fa-check"></i> Secure file storage (.enc format with salt+IV+tag+ciphertext)</li>
+                <li><i class="fas fa-check"></i> Hex preview of encrypted data</li>
+                <li><i class="fas fa-check"></i> Image decryption (password-protected)</li>
+                <li><i class="fas fa-check"></i> LSB image steganography (PNG)</li>
+                <li><i class="fas fa-check"></i> Steganography auto-download</li>
+                <li><i class="fas fa-check"></i> Message extraction from stego images</li>
+                <li><i class="fas fa-check"></i> Simple login system (admin/pass)</li>
+                <li><i class="fas fa-check"></i> Team member display (numbered, prominent)</li>
+                <li><i class="fas fa-check"></i> Modern UI (glassmorphism, dark theme, responsive)</li>
+                <li><i class="fas fa-check"></i> Mobile-responsive design</li>
+                <li><i class="fas fa-check"></i> Error handling & validation</li>
+            </ul>
+        </div>
+
+        <!-- Demo Script -->
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-play-circle"></i>Demo Script</h2>
+            
+            <h5 class="mt-4 mb-3">Encryption Demo (2–3 minutes)</h5>
+            <div class="demo-step">1. <strong>Login</strong> with admin / pass</div>
+            <div class="demo-step">2. Go to <strong>Encrypt</strong> section</div>
+            <div class="demo-step">3. <strong>Upload</strong> a test image (PNG/JPG)</div>
+            <div class="demo-step">4. Enter <strong>password</strong> (e.g., "MySecret123")</div>
+            <div class="demo-step">5. Click <strong>"Encrypt Image"</strong></div>
+            <div class="demo-step">6. View <strong>hex preview</strong> and download .enc file</div>
+
+            <h5 class="mt-4 mb-3">Decryption Demo (1–2 minutes)</h5>
+            <div class="demo-step">1. Go to <strong>Decrypt</strong> section</div>
+            <div class="demo-step">2. <strong>Upload</strong> the .enc file from encryption</div>
+            <div class="demo-step">3. Enter the <strong>same password</strong></div>
+            <div class="demo-step">4. Click <strong>"Decrypt Image"</strong></div>
+            <div class="demo-step">5. Verify <strong>decrypted image matches original</strong></div>
+
+            <h5 class="mt-4 mb-3">Steganography Demo (1–2 minutes)</h5>
+            <div class="demo-step">1. Go to <strong>Steganography</strong> section</div>
+            <div class="demo-step">2. <strong>Upload a PNG</strong> image</div>
+            <div class="demo-step">3. Enter secret message: <strong>"This is hidden!"</strong></div>
+            <div class="demo-step">4. Click <strong>"Embed Message"</strong> (auto-downloads stego image)</div>
+            <div class="demo-step">5. Go to <strong>Extract</strong> tab, upload stego image</div>
+            <div class="demo-step">6. Message appears: <strong>"This is hidden!"</strong></div>
+        </div>
+
+        <!-- How to Run -->
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-rocket"></i>How to Run</h2>
+            <h5 class="mt-4 mb-3">Prerequisites</h5>
+            <ul class="checklist">
+                <li><i class="fas fa-check"></i> Python 3.7 or higher</li>
+                <li><i class="fas fa-check"></i> pip (Python package manager)</li>
+            </ul>
+            <h5 class="mt-4 mb-3">Quick Start</h5>
+            <div class="code-block">
+# 1. Navigate to project directory
+cd Project_of_IS
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Run the Flask app
+python app.py
+
+# 4. Open browser
+# http://127.0.0.1:5000/
+
+# 5. Login credentials
+# Username: admin
+# Password: pass
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="section-card" style="text-align: center; margin-top: 40px; margin-bottom: 100px;">
+            <h5 class="mb-2">Project Status</h5>
+            <p style="color: var(--success-color); font-weight: 700;"><i class="fas fa-check-circle"></i> Complete & Ready for Presentation</p>
+            <p class="text-muted small mt-3">Last Updated: November 22, 2025</p>
+        </div>
+    </div>
+
+    <!-- Print Button -->
+    <button class="btn btn-encrypt print-button" onclick="window.print()">
+        <i class="fas fa-print me-2"></i> Print Background
+    </button>
+
+    <!-- Footer -->
+    <footer class="footer mt-5">
+        <div class="container text-center">
+            <p class="mb-0"><i class="fas fa-lock"></i> CipherFrame — Secure Image Encryption System</p>
+            <p class="text-muted small">Team: Muhammad Tayyab Mujtaba Khan | Owais Ismail | Qasim Usman</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
