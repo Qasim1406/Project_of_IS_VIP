@@ -12,9 +12,10 @@ This is a Flask application that has been configured for deployment on Vercel us
 │   ├── app.py           # Main Flask application
 │   ├── templates/       # Jinja2 templates
 │   ├── static/          # CSS, JS, images
-│   ├── encrypted_files/ # Local storage (not used on Vercel)
-│   └── requirements.txt # Python dependencies
+│   └── encrypted_files/ # Local storage (not used on Vercel)
+├── requirements.txt     # Python dependencies (in root for Vercel detection)
 ├── vercel.json          # Vercel configuration
+├── .vercelignore       # Files to exclude from deployment
 └── README.md           # This file
 ```
 

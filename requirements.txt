@@ -1,0 +1,5 @@
+Flask==2.3.0
+cryptography==41.0.0
+Werkzeug==2.3.0
+Pillow==9.5.0
+vercel>=0.1.0
