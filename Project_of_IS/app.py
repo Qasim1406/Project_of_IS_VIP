@@ -12,12 +12,13 @@ from datetime import timedelta
 from PIL import Image
 import math
 
-# Vercel Blob storage imports
+# Vercel Blob storage imports (only available on Vercel platform)
+VERCEL_BLOB_AVAILABLE = False
 try:
-    from vercel.blob import put, get, delete, list
+    import vercel.blob  # noqa: F401
     VERCEL_BLOB_AVAILABLE = True
 except ImportError:
-    VERCEL_BLOB_AVAILABLE = False
+    pass
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-change-this-in-production'
@@ -228,6 +229,7 @@ def save_to_blob(data, filename):
         return None, "Blob storage not available"
 
     try:
+        from vercel.blob import put
         blob = put(filename, data)
         return blob.url, None
     except Exception as e:
@@ -239,6 +241,7 @@ def get_from_blob(url):
         return None, "Blob storage not available"
 
     try:
+        from vercel.blob import get
         blob = get(url)
         return blob.read(), None
     except Exception as e:
@@ -250,6 +253,7 @@ def delete_from_blob(url):
         return False, "Blob storage not available"
 
     try:
+        from vercel.blob import delete
         delete(url)
         return True, None
     except Exception as e:
