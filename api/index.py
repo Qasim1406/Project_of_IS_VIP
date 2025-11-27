@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 from io import BytesIO
 from urllib.parse import urlparse
 
@@ -56,19 +57,92 @@ def handler(request):
         # Debug endpoint
         url = request.get('url', '/')
         if url == '/api/debug':
-            import os
+            debug_info = {
+                'message': 'Debug info',
+                'working_directory': os.getcwd(),
+                'files_in_api': os.listdir('.'),
+                'files_in_parent': os.listdir('..') if os.path.exists('..') else 'no parent',
+                'python_path': sys.path[:3],
+                'vercel_env': os.environ.get('VERCEL', 'not set')
+            }
             return {
                 'statusCode': 200,
                 'headers': {'Content-Type': 'application/json'},
-                'body': {
-                    'message': 'Debug info',
-                    'working_directory': os.getcwd(),
-                    'files_in_api': os.listdir('.'),
-                    'files_in_parent': os.listdir('..') if os.path.exists('..') else 'no parent',
-                    'python_path': sys.path[:3],  # First 3 paths
-                    'vercel_env': os.environ.get('VERCEL', 'not set')
-                }
+                'body': json.dumps(debug_info)
             }
+
+        # Test minimal Flask response first
+        if url == '/api/test':
+            try:
+                from flask import Flask
+                test_app = Flask(__name__)
+
+                @test_app.route('/')
+                def test_route():
+                    return {'status': 'minimal flask test'}
+
+                with test_app.test_client() as client:
+                    response = client.get('/')
+                    return {
+                        'statusCode': 200,
+                        'headers': {'Content-Type': 'application/json'},
+                        'body': json.dumps({
+                            'message': 'Flask test successful',
+                            'status': response.status_code,
+                            'response_data': response.get_json()
+                        })
+                    }
+            except Exception as e:
+                return {
+                    'statusCode': 500,
+                    'headers': {'Content-Type': 'application/json'},
+                    'body': json.dumps({
+                        'error': 'Flask test failed',
+                        'details': str(e),
+                        'type': type(e).__name__
+                    })
+                }
+
+        # Test main app import
+        if url == '/api/app-test':
+            try:
+                # Test importing the main app
+                response = wsgi_to_vercel_response({
+                    'REQUEST_METHOD': 'GET',
+                    'PATH_INFO': '/health',
+                    'QUERY_STRING': '',
+                    'CONTENT_TYPE': '',
+                    'CONTENT_LENGTH': '0',
+                    'SERVER_NAME': 'test',
+                    'SERVER_PORT': '443',
+                    'wsgi.version': (1, 0),
+                    'wsgi.url_scheme': 'https',
+                    'wsgi.input': BytesIO(),
+                    'wsgi.errors': sys.stderr,
+                    'wsgi.multithread': False,
+                    'wsgi.multiprocess': False,
+                    'wsgi.run_once': False,
+                }, lambda status, headers: None)
+
+                return {
+                    'statusCode': response['statusCode'],
+                    'headers': {'Content-Type': 'application/json'},
+                    'body': json.dumps({
+                        'message': 'Main app test successful',
+                        'app_status': response['statusCode'],
+                        'response_preview': response['body'][:200] + '...' if len(response['body']) > 200 else response['body']
+                    })
+                }
+            except Exception as e:
+                return {
+                    'statusCode': 500,
+                    'headers': {'Content-Type': 'application/json'},
+                    'body': json.dumps({
+                        'error': 'Main app test failed',
+                        'details': str(e),
+                        'type': type(e).__name__
+                    })
+                }
         # Extract request data from Vercel format
         method = request.get('method', 'GET')
         url = request.get('url', '/')

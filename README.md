@@ -74,7 +74,12 @@ For local development, the app will use the local filesystem for file storage.
 - `GET /download/<filename>` - Download encrypted file
 - `POST /steg/embed` - Embed message in image
 - `POST /steg/extract` - Extract message from image
-- `GET /api/debug` - Debug information (for troubleshooting)
+
+## Debug Endpoints (for troubleshooting)
+
+- `GET /api/debug` - Environment and file system information
+- `GET /api/test` - Test minimal Flask functionality
+- `GET /api/app-test` - Test main Flask app import and basic routing
 
 ## Notes
 
