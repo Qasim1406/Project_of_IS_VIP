@@ -9,96 +9,302 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <style>
-    .dashboard-card {
-      height: 100%;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Advanced Hero Section */
+    .hero-section {
+      background: var(--gradient-bg);
+      padding: 6rem 0 4rem;
       position: relative;
       overflow: hidden;
-      z-index: 1;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+      animation: heroGlow 10s ease-in-out infinite alternate;
+    }
+
+    @keyframes heroGlow {
+      0% { opacity: 0.8; }
+      100% { opacity: 1; }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: titleGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes titleGlow {
+      0% { filter: brightness(1); }
+      100% { filter: brightness(1.1); }
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+
+    /* Enhanced Cards */
+    .dashboard-card {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      transition: all var(--transition-slow);
+      cursor: pointer;
+      border: 1px solid var(--glass-border);
+    }
+
+    .dashboard-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--gradient-primary);
+      opacity: 0;
+      transition: opacity var(--transition-normal);
+      z-index: -1;
+    }
+
+    .dashboard-card:hover::before {
+      opacity: 0.05;
     }
 
     .dashboard-card:hover {
-      transform: translateY(-8px);
-      box-shadow: var(--shadow-glow);
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: var(--shadow-glow-hover);
       border-color: var(--primary);
     }
 
     .card-icon-wrapper {
-      width: 80px;
-      height: 80px;
-      border-radius: 20px;
-      background: rgba(99, 102, 241, 0.1);
+      width: 90px;
+      height: 90px;
+      border-radius: 24px;
+      background: var(--bg-glass);
+      border: 1px solid var(--glass-border);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 1.5rem;
-      transition: all 0.3s ease;
-    }
-
-    .dashboard-card:hover .card-icon-wrapper {
-      background: var(--gradient-primary);
-      transform: scale(1.1) rotate(5deg);
-    }
-
-    .dashboard-card:hover .card-icon-wrapper i {
-      color: white !important;
-    }
-
-    .feature-list li {
-      margin-bottom: 0.5rem;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-    }
-
-    .feature-list i {
-      color: var(--success);
-      margin-right: 0.5rem;
-    }
-
-    .welcome-banner {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-      border: 1px solid var(--glass-border);
-      border-radius: 24px;
-      padding: 3rem;
-      margin-bottom: 3rem;
+      margin-bottom: 2rem;
+      transition: all var(--transition-bounce);
       position: relative;
       overflow: hidden;
     }
 
-    .welcome-banner::after {
+    .card-icon-wrapper::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gradient-primary);
+      opacity: 0;
+      transition: opacity var(--transition-normal);
+    }
+
+    .dashboard-card:hover .card-icon-wrapper {
+      transform: scale(1.15) rotate(8deg);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .dashboard-card:hover .card-icon-wrapper::before {
+      opacity: 0.1;
+    }
+
+    .dashboard-card:hover .card-icon-wrapper i {
+      color: var(--primary) !important;
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 8px var(--primary));
+    }
+
+    .feature-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .feature-list li {
+      margin-bottom: 0.75rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all var(--transition-fast);
+    }
+
+    .feature-list i {
+      color: var(--success);
+      font-size: 0.8rem;
+      transition: all var(--transition-fast);
+    }
+
+    .dashboard-card:hover .feature-list li {
+      color: var(--text-secondary);
+    }
+
+    .dashboard-card:hover .feature-list i {
+      color: var(--primary);
+      transform: scale(1.1);
+    }
+
+    /* Stats Section */
+    .stats-section {
+      background: var(--bg-glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius-xl);
+      padding: 2rem;
+      margin: 3rem 0;
+      backdrop-filter: var(--glass-backdrop);
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Team Section Enhancement */
+    .member-avatar {
+      width: 50px;
+      height: 50px;
+      background: var(--gradient-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: white;
+      box-shadow: var(--shadow-glow);
+      transition: all var(--transition-normal);
+    }
+
+    .member-avatar:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-glow-hover);
+    }
+
+    /* Action Buttons */
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-hero {
+      padding: 1rem 2rem;
+      border-radius: var(--border-radius-lg);
+      font-weight: 600;
+      text-decoration: none;
+      transition: all var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-hero::before {
       content: '';
       position: absolute;
       top: 0;
-      right: 0;
-      width: 300px;
+      left: -100%;
+      width: 100%;
       height: 100%;
-      background: radial-gradient(circle at center, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
-      filter: blur(40px);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left var(--transition-slow);
+    }
+
+    .btn-hero:hover::before {
+      left: 100%;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .card-icon-wrapper {
+        width: 70px;
+        height: 70px;
+      }
     }
   </style>
 </head>
 
-<body>
-
-  <nav class="navbar navbar-expand-lg navbar-dark glass-nav sticky-top">
+<body class="page-enter">
+  <!-- Enhanced Navigation -->
+  <nav class="navbar navbar-expand-lg glass-nav sticky-top">
     <div class="container">
-      <a class="navbar-brand" href="/">
+      <a class="navbar-brand hover-lift" href="/">
         <div class="brand-icon">
           <i class="fas fa-shield-halved"></i>
         </div>
-        CipherFrame
+        <span class="fw-bold">CipherFrame</span>
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto align-items-center">
-          <li class="nav-item me-3">
-            <span class="text-muted small">Logged in as <strong class="text-white">{{ session.get('user', 'User')
-                }}</strong></span>
+          <li class="nav-item">
+            <a href="/app" class="btn btn-ghost btn-sm me-3">
+              <i class="fas fa-tools me-2"></i>Tools
+            </a>
           </li>
           <li class="nav-item">
-            <a href="/logout" class="btn btn-sm btn-secondary-glow">
+            <a href="/background" class="btn btn-ghost btn-sm me-3">
+              <i class="fas fa-file-alt me-2"></i>Background
+            </a>
+          </li>
+          <li class="nav-item me-3">
+            <span style="color: #b8c5d6; font-size: 0.875rem;" class="d-flex align-items-center">
+              <i class="fas fa-user-circle me-2 text-primary"></i>
+              <strong class="text-white">{{ session.get('user', 'User') }}</strong>
+            </span>
+          </li>
+          <li class="nav-item">
+            <a href="/logout" class="btn btn-secondary-glow btn-sm">
               <i class="fas fa-sign-out-alt me-2"></i> Logout
             </a>
           </li>
@@ -107,130 +313,189 @@
     </div>
   </nav>
 
-  <main class="container py-5">
-    <!-- Welcome Section -->
-    <div class="welcome-banner fade-in-up">
-      <div class="row align-items-center">
-        <div class="col-lg-8">
-          <h1 class="display-5 fw-bold mb-3">Secure Your Digital Assets</h1>
-          <p class="lead text-muted mb-4">
-            Welcome to CipherFrame. Choose a tool below to start encrypting, decrypting, or hiding your sensitive data
-            within images.
-          </p>
-          <div class="d-flex gap-3">
-            <a href="/app#encrypt-section" class="btn btn-primary-glow" style="width: auto;">
-              <i class="fas fa-play me-2"></i> Get Started
-            </a>
-            <a href="https://github.com/your-repo" target="_blank" class="btn btn-secondary-glow" style="width: auto;">
-              <i class="fab fa-github me-2"></i> View Source
-            </a>
-          </div>
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-content text-center">
+        <h1 class="hero-title fade-in-up">Secure Your Digital Assets</h1>
+        <p class="hero-subtitle fade-in-up delay-1">Advanced encryption and steganography tools for enterprise-grade data protection</p>
+
+        <div class="hero-actions fade-in-up delay-2">
+          <a href="/app#encrypt-section" class="btn btn-primary-glow btn-hero">
+            <i class="fas fa-rocket me-2"></i>Launch Tools
+          </a>
+          <a href="/background" class="btn btn-secondary-glow btn-hero">
+            <i class="fas fa-info-circle me-2"></i>Learn More
+          </a>
         </div>
-        <div class="col-lg-4 d-none d-lg-block text-center">
-          <i class="fas fa-shield-alt text-primary" style="font-size: 8rem; opacity: 0.2;"></i>
+      </div>
+    </div>
+  </section>
+
+  <main class="container py-5">
+    <!-- Stats Section -->
+    <div class="stats-section fade-in-up delay-3">
+      <div class="row text-center">
+        <div class="col-md-4 stat-item">
+          <div class="stat-number">256-bit</div>
+          <div class="stat-label">AES Encryption</div>
+        </div>
+        <div class="col-md-4 stat-item">
+          <div class="stat-number">LSB</div>
+          <div class="stat-label">Steganography</div>
+        </div>
+        <div class="col-md-4 stat-item">
+          <div class="stat-number">PBKDF2</div>
+          <div class="stat-label">Key Derivation</div>
         </div>
       </div>
     </div>
 
     <!-- Tools Grid -->
-    <div class="row g-4">
+    <div class="row g-4 mb-5">
       <!-- Encryption Card -->
-      <div class="col-lg-4 col-md-6 fade-in-up" style="animation-delay: 0.1s;">
-        <div class="glass-card dashboard-card p-4">
-          <div class="card-icon-wrapper">
+      <div class="col-lg-4 col-md-6 fade-in-up delay-4">
+        <div class="glass-card dashboard-card p-4 h-100">
+          <div class="card-icon-wrapper mx-auto">
             <i class="fas fa-lock fa-2x text-primary"></i>
           </div>
-          <h3 class="fw-bold mb-3">Encryption</h3>
-          <p class="text-muted mb-4">Secure your images with military-grade AES-256-GCM encryption. Password protected
-            and tamper-proof.</p>
-          <ul class="list-unstyled feature-list mb-4">
-            <li><i class="fas fa-check-circle"></i> AES-256-GCM Algorithm</li>
-            <li><i class="fas fa-check-circle"></i> PBKDF2 Key Derivation</li>
-            <li><i class="fas fa-check-circle"></i> Authenticated Encryption</li>
+          <h3 class="fw-bold mb-3 text-center">AES-256 Encryption</h3>
+          <p style="color: #e2e8f0; margin-bottom: 1.5rem; text-align: center;">Military-grade encryption with authenticated cipher mode and secure key derivation.</p>
+          <ul class="feature-list mb-4">
+            <li><i class="fas fa-shield-alt"></i> GCM Authenticated Encryption</li>
+            <li><i class="fas fa-key"></i> PBKDF2 Key Derivation (100k iterations)</li>
+            <li><i class="fas fa-fingerprint"></i> Cryptographic Salt & IV</li>
+            <li><i class="fas fa-eye"></i> Hexadecimal Preview</li>
           </ul>
-          <a href="/app#encrypt-section" class="btn btn-secondary-glow w-100 stretched-link">
-            Launch Tool <i class="fas fa-arrow-right ms-2"></i>
+          <a href="/app#encrypt-section" class="btn btn-secondary-glow w-100">
+            <i class="fas fa-play me-2"></i>Start Encrypting
           </a>
         </div>
       </div>
 
       <!-- Decryption Card -->
-      <div class="col-lg-4 col-md-6 fade-in-up" style="animation-delay: 0.2s;">
-        <div class="glass-card dashboard-card p-4">
-          <div class="card-icon-wrapper">
-            <i class="fas fa-key fa-2x text-secondary"></i>
+      <div class="col-lg-4 col-md-6 fade-in-up delay-5">
+        <div class="glass-card dashboard-card p-4 h-100">
+          <div class="card-icon-wrapper mx-auto">
+            <i class="fas fa-unlock fa-2x text-secondary"></i>
           </div>
-          <h3 class="fw-bold mb-3">Decryption</h3>
-          <p class="text-muted mb-4">Restore your encrypted files to their original state. Requires the correct password
-            and .enc file.</p>
-          <ul class="list-unstyled feature-list mb-4">
-            <li><i class="fas fa-check-circle"></i> Secure Key Recovery</li>
-            <li><i class="fas fa-check-circle"></i> Integrity Verification</li>
-            <li><i class="fas fa-check-circle"></i> Instant Preview</li>
+          <h3 class="fw-bold mb-3 text-center">Secure Decryption</h3>
+          <p style="color: #e2e8f0; margin-bottom: 1.5rem; text-align: center;">Restore encrypted files with integrity verification and instant preview capabilities.</p>
+          <ul class="feature-list mb-4">
+            <li><i class="fas fa-check-circle"></i> Password-Based Recovery</li>
+            <li><i class="fas fa-shield-check"></i> Integrity Verification</li>
+            <li><i class="fas fa-image"></i> Instant Image Preview</li>
+            <li><i class="fas fa-download"></i> One-Click Download</li>
           </ul>
-          <a href="/app#decrypt-section" class="btn btn-secondary-glow w-100 stretched-link">
-            Launch Tool <i class="fas fa-arrow-right ms-2"></i>
+          <a href="/app#decrypt-section" class="btn btn-secondary-glow w-100">
+            <i class="fas fa-key me-2"></i>Decrypt Files
           </a>
         </div>
       </div>
 
       <!-- Steganography Card -->
-      <div class="col-lg-4 col-md-6 fade-in-up" style="animation-delay: 0.3s;">
-        <div class="glass-card dashboard-card p-4">
-          <div class="card-icon-wrapper">
+      <div class="col-lg-4 col-md-6 fade-in-up delay-6">
+        <div class="glass-card dashboard-card p-4 h-100">
+          <div class="card-icon-wrapper mx-auto">
             <i class="fas fa-user-secret fa-2x text-accent"></i>
           </div>
-          <h3 class="fw-bold mb-3">Steganography</h3>
-          <p class="text-muted mb-4">Hide secret messages inside PNG images using LSB manipulation. Invisible to the
-            naked eye.</p>
-          <ul class="list-unstyled feature-list mb-4">
-            <li><i class="fas fa-check-circle"></i> LSB Encoding</li>
-            <li><i class="fas fa-check-circle"></i> Lossless PNG Support</li>
-            <li><i class="fas fa-check-circle"></i> Undetectable Changes</li>
+          <h3 class="fw-bold mb-3 text-center">LSB Steganography</h3>
+          <p style="color: #e2e8f0; margin-bottom: 1.5rem; text-align: center;">Hide secret messages within PNG images using least significant bit manipulation.</p>
+          <ul class="feature-list mb-4">
+            <li><i class="fas fa-palette"></i> Lossless PNG Support</li>
+            <li><i class="fas fa-eye-slash"></i> Invisible to Naked Eye</li>
+            <li><i class="fas fa-search"></i> Message Extraction</li>
+            <li><i class="fas fa-file-image"></i> Auto-Download Stego Images</li>
           </ul>
-          <a href="/app#steg-section" class="btn btn-secondary-glow w-100 stretched-link">
-            Launch Tool <i class="fas fa-arrow-right ms-2"></i>
+          <a href="/app#steg-section" class="btn btn-secondary-glow w-100">
+            <i class="fas fa-magic me-2"></i>Hide Messages
           </a>
         </div>
       </div>
     </div>
 
-    <!-- Team Section -->
-    <div class="mt-5 pt-4 border-top" style="border-color: var(--glass-border) !important;">
-      <h4 class="text-center mb-4 text-muted">Development Team</h4>
-      <div class="row justify-content-center g-3">
-        <div class="col-md-4">
-          <div class="glass-card p-3 d-flex align-items-center gap-3">
-            <div class="member-avatar">1</div>
-            <div>
-              <h6 class="mb-0">Muhammad Tayyab Mujtaba Khan</h6>
-              <small class="text-muted">F24609035</small>
+    <!-- Enhanced Team Section -->
+    <div class="mt-5 pt-5 border-top" style="border-color: var(--glass-border) !important;">
+      <div class="text-center mb-5 fade-in-up">
+        <h2 class="fw-bold mb-3 text-gradient">Development Team</h2>
+        <p style="color: #e2e8f0;">Meet the creators behind CipherFrame's enterprise security solutions</p>
+      </div>
+
+      <div class="row justify-content-center g-4">
+        <div class="col-lg-4 col-md-6 fade-in-left delay-1">
+          <div class="glass-card p-4 d-flex align-items-center gap-4 hover-lift">
+            <div class="member-avatar">MT</div>
+            <div class="flex-grow-1">
+              <h5 class="mb-1 fw-bold">Muhammad Tayyab</h5>
+              <p style="color: #e2e8f0; margin-bottom: 0.25rem;">Lead Developer</p>
+              <small class="text-primary fw-medium">F24609035</small>
             </div>
+            <i class="fas fa-crown text-warning"></i>
           </div>
         </div>
-        <div class="col-md-4">
-          <div class="glass-card p-3 d-flex align-items-center gap-3">
-            <div class="member-avatar">2</div>
-            <div>
-              <h6 class="mb-0">Owais Ismail</h6>
-              <small class="text-muted">F24609055</small>
+
+        <div class="col-lg-4 col-md-6 fade-in-up delay-2">
+          <div class="glass-card p-4 d-flex align-items-center gap-4 hover-lift">
+            <div class="member-avatar">OI</div>
+            <div class="flex-grow-1">
+              <h5 class="mb-1 fw-bold">Owais Ismail</h5>
+              <p style="color: #e2e8f0; margin-bottom: 0.25rem;">Security Specialist</p>
+              <small class="text-primary fw-medium">F24609055</small>
             </div>
+            <i class="fas fa-shield-alt text-success"></i>
           </div>
         </div>
-        <div class="col-md-4">
-          <div class="glass-card p-3 d-flex align-items-center gap-3">
-            <div class="member-avatar">3</div>
-            <div>
-              <h6 class="mb-0">Qasim Usman</h6>
-              <small class="text-muted">F24609008</small>
+
+        <div class="col-lg-4 col-md-6 fade-in-right delay-3">
+          <div class="glass-card p-4 d-flex align-items-center gap-4 hover-lift">
+            <div class="member-avatar">QU</div>
+            <div class="flex-grow-1">
+              <h5 class="mb-1 fw-bold">Qasim Usman</h5>
+              <p style="color: #e2e8f0; margin-bottom: 0.25rem;">UI/UX Designer</p>
+              <small class="text-primary fw-medium">F24609008</small>
             </div>
+            <i class="fas fa-palette text-info"></i>
           </div>
         </div>
       </div>
     </div>
   </main>
 
+  <!-- Floating Action Button -->
+  <button class="btn btn-floating" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" id="scrollTopBtn">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Scroll-to-top button visibility
+    window.addEventListener('scroll', () => {
+      const scrollBtn = document.getElementById('scrollTopBtn');
+      if (window.scrollY > 300) {
+        scrollBtn.style.opacity = '1';
+        scrollBtn.style.transform = 'scale(1)';
+      } else {
+        scrollBtn.style.opacity = '0';
+        scrollBtn.style.transform = 'scale(0.8)';
+      }
+    });
+
+    // Intersection Observer for animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animationPlayState = 'running';
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    // Observe all animated elements
+    document.querySelectorAll('.fade-in-up, .fade-in-left, .fade-in-right, .bounce-in, .scale-in').forEach(el => {
+      el.style.animationPlayState = 'paused';
+      observer.observe(el);
+    });
+  </script>
 </body>
 
 </html>

@@ -3,9 +3,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     setupDragAndDrop('encryptDropArea', 'imageFile', 'encryptFilePreview', 'encryptFileName');
     setupDragAndDrop('decryptDropArea', 'encryptedFile', 'decryptFilePreview', 'decryptFileName');
-    
-    // Initialize AOS-like scroll animations
+
+    // Initialize enhanced features
     setupScrollAnimations();
+    setupPasswordToggles();
+    setupPasswordStrength();
+    setupProgressBar();
+    setupSteganographyCounter();
+    setupFileSizeDisplay();
+    setupFloatingActionButton();
+    setupNavigationDots();
 });
 
 // ============= ENCRYPTION FORM HANDLER =============
@@ -346,6 +353,171 @@ document.getElementById('copyHexBtn')?.addEventListener('click', () => {
     }
 });
 
+// ============= PASSWORD TOGGLES =============
+
+function setupPasswordToggles() {
+    // Encrypt password toggle
+    const toggleEncrypt = document.getElementById('toggleEncryptPass');
+    const encryptInput = document.getElementById('encryptPassword');
+
+    if (toggleEncrypt && encryptInput) {
+        toggleEncrypt.addEventListener('click', () => {
+            const type = encryptInput.type === 'password' ? 'text' : 'password';
+            encryptInput.type = type;
+            toggleEncrypt.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        });
+    }
+
+    // Decrypt password toggle
+    const toggleDecrypt = document.getElementById('toggleDecryptPass');
+    const decryptInput = document.getElementById('decryptPassword');
+
+    if (toggleDecrypt && decryptInput) {
+        toggleDecrypt.addEventListener('click', () => {
+            const type = decryptInput.type === 'password' ? 'text' : 'password';
+            decryptInput.type = type;
+            toggleDecrypt.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        });
+    }
+}
+
+// ============= PASSWORD STRENGTH METER =============
+
+function setupPasswordStrength() {
+    const passwordInput = document.getElementById('encryptPassword');
+    const strengthFill = document.getElementById('encryptStrengthFill');
+    const strengthText = document.getElementById('encryptStrengthText');
+
+    if (!passwordInput || !strengthFill || !strengthText) return;
+
+    passwordInput.addEventListener('input', () => {
+        const password = passwordInput.value;
+        const strength = calculatePasswordStrength(password);
+
+        strengthFill.style.width = strength.percentage + '%';
+        strengthFill.className = 'strength-fill strength-' + strength.level;
+
+        strengthText.textContent = strength.text;
+        strengthText.style.color = strength.color;
+    });
+}
+
+function calculatePasswordStrength(password) {
+    let score = 0;
+
+    // Length check
+    if (password.length >= 8) score += 25;
+    else if (password.length >= 6) score += 15;
+    else if (password.length >= 4) score += 10;
+
+    // Character variety
+    if (/[a-z]/.test(password)) score += 15;
+    if (/[A-Z]/.test(password)) score += 15;
+    if (/[0-9]/.test(password)) score += 15;
+    if (/[^A-Za-z0-9]/.test(password)) score += 15;
+
+    // Determine level
+    let level, text, color;
+    if (score >= 70) {
+        level = 'strong';
+        text = 'Strong password';
+        color = '#00ff88';
+    } else if (score >= 40) {
+        level = 'medium';
+        text = 'Medium strength';
+        color = '#ffa500';
+    } else {
+        level = 'weak';
+        text = 'Weak password';
+        color = '#ff4757';
+    }
+
+    return {
+        percentage: Math.min(score, 100),
+        level: level,
+        text: text,
+        color: color
+    };
+}
+
+// ============= PROGRESS BAR =============
+
+function setupProgressBar() {
+    const progressBar = document.getElementById('pageProgress');
+
+    if (!progressBar) return;
+
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPercent = (scrollTop / docHeight) * 100;
+
+        progressBar.style.width = Math.min(scrollPercent, 100) + '%';
+    });
+}
+
+// ============= STEGANOGRAPHY CHARACTER COUNTER =============
+
+function setupSteganographyCounter() {
+    const textarea = document.getElementById('stegMessage');
+    const counter = document.getElementById('charCount');
+
+    if (!textarea || !counter) return;
+
+    textarea.addEventListener('input', () => {
+        const length = textarea.value.length;
+        const maxLength = textarea.getAttribute('maxlength');
+
+        counter.textContent = `${length}/${maxLength} characters`;
+
+        if (length > maxLength * 0.9) {
+            counter.style.color = '#ff4757';
+        } else if (length > maxLength * 0.7) {
+            counter.style.color = '#ffa500';
+        } else {
+            counter.style.color = 'var(--text-muted)';
+        }
+    });
+}
+
+// ============= FILE SIZE DISPLAY =============
+
+function setupFileSizeDisplay() {
+    // Encrypt file size
+    const encryptInput = document.getElementById('imageFile');
+    const encryptSize = document.getElementById('encryptFileSize');
+
+    if (encryptInput && encryptSize) {
+        encryptInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                encryptSize.textContent = formatFileSize(file.size);
+            }
+        });
+    }
+
+    // Decrypt file size
+    const decryptInput = document.getElementById('encryptedFile');
+    const decryptSize = document.getElementById('decryptFileSize');
+
+    if (decryptInput && decryptSize) {
+        decryptInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                decryptSize.textContent = formatFileSize(file.size);
+            }
+        });
+    }
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 // ============= SCROLL ANIMATIONS =============
 
 function setupScrollAnimations() {
@@ -358,9 +530,82 @@ function setupScrollAnimations() {
         });
     }, { threshold: 0.1 });
 
-    document.querySelectorAll('.fade-in-up').forEach(el => {
+    document.querySelectorAll('.fade-in-up, .fade-in-left, .fade-in-right, .bounce-in, .scale-in').forEach(el => {
         el.style.animationPlayState = 'paused';
         observer.observe(el);
     });
+}
+
+// ============= FLOATING ACTION BUTTON =============
+
+function setupFloatingActionButton() {
+    const fabMain = document.getElementById('fabMain');
+    const fabMenu = document.getElementById('fabMenu');
+
+    if (!fabMain || !fabMenu) return;
+
+    fabMain.addEventListener('click', () => {
+        fabMain.classList.toggle('active');
+        fabMenu.classList.toggle('active');
+    });
+
+    // Close FAB menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!fabMain.contains(e.target) && !fabMenu.contains(e.target)) {
+            fabMain.classList.remove('active');
+            fabMenu.classList.remove('active');
+        }
+    });
+}
+
+// ============= NAVIGATION DOTS =============
+
+function setupNavigationDots() {
+    const navDots = document.querySelectorAll('.nav-dot');
+
+    if (navDots.length === 0) return;
+
+    // Update active dot based on scroll position
+    const updateActiveDot = () => {
+        const sections = ['encrypt-section', 'decrypt-section', 'steg-section'];
+        const scrollPosition = window.scrollY + window.innerHeight / 2;
+
+        sections.forEach((sectionId, index) => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const sectionTop = section.offsetTop;
+                const sectionBottom = sectionTop + section.offsetHeight;
+
+                if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+                    navDots.forEach(dot => dot.classList.remove('active'));
+                    navDots[index].classList.add('active');
+                }
+            }
+        });
+    };
+
+    // Scroll to section when dot is clicked
+    navDots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            const sectionId = dot.getAttribute('data-section');
+            scrollToSection(sectionId);
+        });
+    });
+
+    window.addEventListener('scroll', updateActiveDot);
+    updateActiveDot(); // Initial call
+}
+
+// ============= SCROLL TO SECTION HELPER =============
+
+function scrollToSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        const offsetTop = section.offsetTop - 100; // Account for navbar
+        window.scrollTo({
+            top: offsetTop,
+            behavior: 'smooth'
+        });
+    }
 }
 

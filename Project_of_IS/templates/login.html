@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login - CipherFrame</title>
+  <title>Secure Access - CipherFrame</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -14,20 +14,19 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1rem;
-      position: relative;
-      overflow: hidden;
+      padding: 2rem 1rem;
+      background: linear-gradient(135deg, #0a0a0f 0%, #111118 100%);
     }
 
-    /* Background Watermark/Label */
-    .bg-label {
+    /* Simple background watermark */
+    .bg-branding {
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) rotate(-10deg);
-      font-size: 15vw;
+      transform: translate(-50%, -50%);
+      font-size: 12vw;
       font-weight: 900;
-      color: rgba(255, 255, 255, 0.02);
+      color: rgba(0, 212, 255, 0.03);
       white-space: nowrap;
       pointer-events: none;
       z-index: 0;
@@ -35,75 +34,32 @@
       letter-spacing: 10px;
     }
 
-    /* Floating Shapes */
-    .shape {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(60px);
-      opacity: 0.4;
-      z-index: 0;
-      animation: floatAnimation 20s infinite alternate;
-    }
-
-    .shape-1 {
-      top: -10%;
-      left: -10%;
-      width: 500px;
-      height: 500px;
-      background: var(--primary);
-    }
-
-    .shape-2 {
-      bottom: -10%;
-      right: -10%;
-      width: 400px;
-      height: 400px;
-      background: var(--secondary);
-      animation-delay: -5s;
-    }
-
-    @keyframes floatAnimation {
-      0% {
-        transform: translate(0, 0);
-      }
-
-      100% {
-        transform: translate(50px, 50px);
-      }
-    }
-
+    /* Clean brand logo */
     .brand-logo {
-      width: 64px;
-      height: 64px;
-      background: var(--gradient-primary);
-      border-radius: 16px;
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(135deg, #00d4ff 0%, #6366f1 100%);
+      border-radius: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 2rem;
       color: white;
-      margin: 0 auto 1.5rem;
-      box-shadow: var(--shadow-glow);
-      animation: float 6s ease-in-out infinite;
+      margin: 0 auto 2rem;
+      box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+      transition: transform 0.3s ease;
     }
 
-    @keyframes float {
-
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-
-      50% {
-        transform: translateY(-10px);
-      }
+    .brand-logo:hover {
+      transform: scale(1.05);
     }
 
+    /* Clean input styling */
     .input-group-text {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-right: none;
-      color: var(--text-muted);
+      color: #b8c5d6;
       border-top-left-radius: 12px;
       border-bottom-left-radius: 12px;
     }
@@ -113,7 +69,8 @@
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
       color: white !important;
-      /* Ensure white text */
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .glass-input::placeholder {
@@ -121,81 +78,130 @@
     }
 
     .glass-input:focus {
-      box-shadow: none;
-      border-color: var(--glass-border);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+      border-color: #00d4ff;
+      background: rgba(0, 212, 255, 0.02);
     }
 
     .input-group:focus-within .input-group-text {
-      border-color: var(--primary);
-      color: var(--primary);
+      border-color: #00d4ff;
+      color: #00d4ff;
     }
 
-    .input-group:focus-within .glass-input {
-      border-color: var(--primary);
-    }
-
-    .glass-card {
+    /* Clean card design */
+    .login-card {
+      background: rgba(26, 26, 36, 0.8);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      max-width: 420px;
+      width: 100%;
+      position: relative;
       z-index: 1;
-      backdrop-filter: blur(20px);
-      /* Stronger blur for login card */
+    }
+
+    /* Simple credential hint */
+    .credential-hint {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .bg-branding {
+        font-size: 20vw;
+        letter-spacing: 5px;
+      }
+
+      .brand-logo {
+        width: 60px;
+        height: 60px;
+        font-size: 1.75rem;
+      }
+
+      .login-card {
+        padding: 2rem;
+        margin: 1rem;
+      }
     }
   </style>
 </head>
 
 <body>
   <div class="login-container">
-    <!-- Background Elements -->
-    <div class="bg-label">CipherFrame</div>
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
+    <!-- Simple background watermark -->
+    <div class="bg-branding">CipherFrame</div>
 
-    <div class="glass-card fade-in-up" style="max-width: 420px; width: 100%;">
+    <!-- Clean login card -->
+    <div class="login-card">
       <div class="text-center mb-4">
         <div class="brand-logo">
           <i class="fas fa-shield-halved"></i>
         </div>
-        <h2 class="fw-bold text-white mb-1">Welcome Back</h2>
-        <p class="text-muted">Sign in to access secure tools</p>
+        <h2 class="fw-bold mb-2" style="color: white;">Secure Access</h2>
+        <p style="color: #e2e8f0; margin-bottom: 0;">Enter your credentials to access the encryption suite</p>
       </div>
 
       {% if error %}
-      <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
-        <i class="fas fa-exclamation-circle me-2"></i>
-        <div>{{ error }}</div>
+      <div class="alert alert-danger mb-4" role="alert" style="background: rgba(255, 71, 87, 0.1); border: 1px solid rgba(255, 71, 87, 0.2); color: #ff4757;">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>{{ error }}</strong>
       </div>
       {% endif %}
 
       <form method="post" action="/login">
-        <div class="mb-4">
-          <label class="form-label text-white">Username</label>
+        <div class="mb-3">
+          <label class="form-label fw-medium" style="color: #e2e8f0;">
+            <i class="fas fa-user me-2"></i>Username
+          </label>
           <div class="input-group">
-            <span class="input-group-text"><i class="fas fa-user"></i></span>
-            <input type="text" class="form-control glass-input" name="username" required placeholder="Enter username">
+            <span class="input-group-text">
+              <i class="fas fa-user"></i>
+            </span>
+            <input type="text" class="form-control glass-input" name="username" required placeholder="Enter your username" autocomplete="username">
           </div>
         </div>
 
         <div class="mb-4">
-          <label class="form-label text-white">Password</label>
+          <label class="form-label fw-medium" style="color: #e2e8f0;">
+            <i class="fas fa-lock me-2"></i>Password
+          </label>
           <div class="input-group">
-            <span class="input-group-text"><i class="fas fa-lock"></i></span>
-            <input type="password" class="form-control glass-input" name="password" required
-              placeholder="Enter password">
+            <span class="input-group-text">
+              <i class="fas fa-lock"></i>
+            </span>
+            <input type="password" class="form-control glass-input" name="password" required placeholder="Enter your password" autocomplete="current-password">
           </div>
         </div>
 
-        <button class="btn btn-primary-glow mb-4" type="submit">
-          Sign In <i class="fas fa-arrow-right ms-2"></i>
+        <button class="btn btn-primary mb-4 w-100 fw-semibold" type="submit" style="background: linear-gradient(135deg, #00d4ff 0%, #6366f1 100%); border: none; color: white;">
+          <i class="fas fa-sign-in-alt me-2"></i>Access System
         </button>
       </form>
 
-      <div class="text-center pt-3 border-top border-secondary" style="border-color: var(--glass-border) !important;">
-        <p class="small text-muted mb-0">
-          <i class="fas fa-info-circle me-1"></i> Demo Credentials:
-          <span class="text-white fw-medium">admin</span> / <span class="text-white fw-medium">pass</span>
-        </p>
+      <!-- Simple demo credentials -->
+      <div class="credential-hint">
+        <i class="fas fa-info-circle me-2" style="color: #b8c5d6;"></i>
+        <span style="color: #b8c5d6;">Demo credentials: </span>
+        <code style="color: #00d4ff;">admin</code> /
+        <code style="color: #00d4ff;">pass</code>
+      </div>
+
+      <!-- Security note -->
+      <div class="text-center mt-4 pt-3 border-top" style="border-color: rgba(255, 255, 255, 0.1) !important;">
+        <i class="fas fa-shield-alt me-2 text-success"></i>
+        <small style="color: #b8c5d6;">256-bit AES Encryption • Enterprise Security</small>
       </div>
     </div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
