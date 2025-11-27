@@ -3,11 +3,16 @@ import os
 from io import BytesIO
 from urllib.parse import urlparse
 
-# Add the parent directory to Python path so we can import the Flask app
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
-# Import the Flask app from the main app.py
-from Project_of_IS.app import app
+# Import the Flask app from the local copy
+try:
+    from app import app
+except ImportError:
+    # Fallback for local testing
+    import sys
+    import os
+    parent_dir = os.path.dirname(os.path.dirname(__file__))
+    sys.path.insert(0, os.path.join(parent_dir, 'Project_of_IS'))
+    from app import app
 
 # Vercel Blob storage imports
 try:
@@ -48,6 +53,22 @@ def handler(request):
     Converts Vercel's request format to WSGI and back
     """
     try:
+        # Debug endpoint
+        url = request.get('url', '/')
+        if url == '/api/debug':
+            import os
+            return {
+                'statusCode': 200,
+                'headers': {'Content-Type': 'application/json'},
+                'body': {
+                    'message': 'Debug info',
+                    'working_directory': os.getcwd(),
+                    'files_in_api': os.listdir('.'),
+                    'files_in_parent': os.listdir('..') if os.path.exists('..') else 'no parent',
+                    'python_path': sys.path[:3],  # First 3 paths
+                    'vercel_env': os.environ.get('VERCEL', 'not set')
+                }
+            }
         # Extract request data from Vercel format
         method = request.get('method', 'GET')
         url = request.get('url', '/')

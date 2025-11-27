@@ -74,6 +74,7 @@ For local development, the app will use the local filesystem for file storage.
 - `GET /download/<filename>` - Download encrypted file
 - `POST /steg/embed` - Embed message in image
 - `POST /steg/extract` - Extract message from image
+- `GET /api/debug` - Debug information (for troubleshooting)
 
 ## Notes
 

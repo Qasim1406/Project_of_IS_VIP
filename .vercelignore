@@ -28,6 +28,7 @@ test_deployment.py
 
 # Keep only necessary files for deployment
 !api/
-!Project_of_IS/
+!Project_of_IS/templates/
+!Project_of_IS/static/
 !requirements.txt
 !vercel.json
