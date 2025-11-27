@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for, Response
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -12,6 +12,13 @@ from datetime import timedelta
 from PIL import Image
 import math
 
+# Vercel Blob storage imports
+try:
+    from vercel.blob import put, get, delete, list
+    VERCEL_BLOB_AVAILABLE = True
+except ImportError:
+    VERCEL_BLOB_AVAILABLE = False
+
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-change-this-in-production'
 app.config['SESSION_PERMANENT'] = False
@@ -24,7 +31,10 @@ UPLOAD_FOLDER = 'encrypted_files'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp'}
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
 
-if not os.path.exists(UPLOAD_FOLDER):
+# Check if running on Vercel
+IS_VERCEL = os.environ.get('VERCEL') == '1'
+
+if not IS_VERCEL and not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 # Simple team info to display after login
@@ -210,6 +220,41 @@ def allowed_file(filename):
     """Check if file extension is allowed."""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# ============= VERCEL BLOB STORAGE HELPERS =============
+
+def save_to_blob(data, filename):
+    """Save data to Vercel Blob storage and return the blob URL."""
+    if not VERCEL_BLOB_AVAILABLE:
+        return None, "Blob storage not available"
+
+    try:
+        blob = put(filename, data)
+        return blob.url, None
+    except Exception as e:
+        return None, str(e)
+
+def get_from_blob(url):
+    """Get data from Vercel Blob storage URL."""
+    if not VERCEL_BLOB_AVAILABLE:
+        return None, "Blob storage not available"
+
+    try:
+        blob = get(url)
+        return blob.read(), None
+    except Exception as e:
+        return None, str(e)
+
+def delete_from_blob(url):
+    """Delete file from Vercel Blob storage."""
+    if not VERCEL_BLOB_AVAILABLE:
+        return False, "Blob storage not available"
+
+    try:
+        delete(url)
+        return True, None
+    except Exception as e:
+        return False, str(e)
+
 # ============= FLASK ROUTES =============
 
 @app.route('/')
@@ -267,49 +312,82 @@ def encrypt_route():
         
         # Encrypt image
         encrypted_data, salt, iv, tag = encrypt_image(image_bytes, password)
-        
+
         # Save encrypted file
         filename = secure_filename(file.filename)
         base_name = os.path.splitext(filename)[0]
         encrypted_filename = f"{base_name}_{secrets.token_hex(4)}.enc"
-        filepath = os.path.join(UPLOAD_FOLDER, encrypted_filename)
-        
-        with open(filepath, 'wb') as f:
-            f.write(encrypted_data)
-        
+
+        if IS_VERCEL and VERCEL_BLOB_AVAILABLE:
+            # Use Vercel Blob storage
+            blob_url, error = save_to_blob(encrypted_data, encrypted_filename)
+            if error:
+                return jsonify({'error': f'Blob storage error: {error}'}), 500
+            # Store blob URL in session for download
+            session['last_encrypted_file'] = blob_url
+            session['last_encrypted_filename'] = encrypted_filename
+        else:
+            # Use local filesystem
+            filepath = os.path.join(UPLOAD_FOLDER, encrypted_filename)
+            with open(filepath, 'wb') as f:
+                f.write(encrypted_data)
+            # Store encrypted filename in session for download
+            session['last_encrypted_file'] = encrypted_filename
+
         # Generate hex preview
         hex_preview = get_hex_preview(encrypted_data)
         
-        # Store encrypted filename in session for download
-        session['last_encrypted_file'] = encrypted_filename
-        
-        return jsonify({
+        response_data = {
             'success': True,
             'message': 'Image encrypted successfully',
             'encrypted_filename': encrypted_filename,
             'hex_preview': hex_preview,
             'file_size': len(encrypted_data),
             'original_name': filename
-        }), 200
+        }
+
+        # Add download URL for blob storage
+        if IS_VERCEL and VERCEL_BLOB_AVAILABLE and 'last_encrypted_file' in session:
+            response_data['download_url'] = session['last_encrypted_file']
+
+        return jsonify(response_data), 200
     
     except Exception as e:
         return jsonify({'error': f'Encryption error: {str(e)}'}), 500
 
-@app.route('/download/<filename>')
+@app.route('/download/<path:filename>')
 def download_encrypted(filename):
     """Download encrypted file."""
     try:
-        # Security: prevent directory traversal
-        if '..' in filename or '/' in filename or '\\' in filename:
-            return jsonify({'error': 'Invalid filename'}), 400
-        
-        filepath = os.path.join(UPLOAD_FOLDER, filename)
-        
-        if not os.path.exists(filepath):
-            return jsonify({'error': 'File not found'}), 404
-        
-        return send_file(filepath, as_attachment=True, download_name=filename)
-    
+        if IS_VERCEL and VERCEL_BLOB_AVAILABLE:
+            # Handle blob storage URLs
+            if filename.startswith('http'):
+                # This is a blob URL, fetch and serve the content
+                data, error = get_from_blob(filename)
+                if error:
+                    return jsonify({'error': f'Blob retrieval error: {error}'}), 500
+                if data is None:
+                    return jsonify({'error': 'File not found'}), 404
+
+                # Extract filename from URL or use default
+                download_name = filename.split('/')[-1] if '/' in filename else 'encrypted_file.enc'
+                return Response(data, mimetype='application/octet-stream',
+                              headers={'Content-Disposition': f'attachment; filename={download_name}'})
+            else:
+                return jsonify({'error': 'Invalid file URL'}), 400
+        else:
+            # Local filesystem handling
+            # Security: prevent directory traversal
+            if '..' in filename or '/' in filename or '\\' in filename:
+                return jsonify({'error': 'Invalid filename'}), 400
+
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+
+            if not os.path.exists(filepath):
+                return jsonify({'error': 'File not found'}), 404
+
+            return send_file(filepath, as_attachment=True, download_name=filename)
+
     except Exception as e:
         return jsonify({'error': f'Download error: {str(e)}'}), 500
 
@@ -392,18 +470,35 @@ def steg_embed():
     filename = secure_filename(file.filename)
     base_name = os.path.splitext(filename)[0]
     stego_filename = f"{base_name}_stego_{secrets.token_hex(4)}.png"
-    filepath = os.path.join(UPLOAD_FOLDER, stego_filename)
-    with open(filepath, 'wb') as f:
-        f.write(stego_bytes)
+
+    if IS_VERCEL and VERCEL_BLOB_AVAILABLE:
+        # Use Vercel Blob storage
+        blob_url, error = save_to_blob(stego_bytes, stego_filename)
+        if error:
+            return jsonify({'error': f'Blob storage error: {error}'}), 500
+        # Store blob URL in session for potential download
+        session['last_stego_file'] = blob_url
+        session['last_stego_filename'] = stego_filename
+    else:
+        # Use local filesystem
+        filepath = os.path.join(UPLOAD_FOLDER, stego_filename)
+        with open(filepath, 'wb') as f:
+            f.write(stego_bytes)
 
     # Also provide base64 preview
     b64 = base64.b64encode(stego_bytes).decode('utf-8')
-    return jsonify({
+    response_data = {
         'success': True,
         'message': 'Message embedded successfully',
         'stego_filename': stego_filename,
         'image_data': f"data:image/png;base64,{b64}",
-    }), 200
+    }
+
+    # Add download URL for blob storage
+    if IS_VERCEL and VERCEL_BLOB_AVAILABLE and 'last_stego_file' in session:
+        response_data['download_url'] = session['last_stego_file']
+
+    return jsonify(response_data), 200
 
 
 @app.route('/steg/extract', methods=['POST'])
